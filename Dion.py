@@ -9,7 +9,7 @@ import keyboard
 '''
 
 # Характеристики поля
-E_x = 0
+E_x = 10
 B_z = 10
 
 # Характеристики диона (скорости/ масса / заряд электрический/ заряд магнитный)
@@ -82,7 +82,7 @@ def animation_3D(x, y, z):
     ax.set_zlabel('Z')
     ax.plot(x, y, z)
     ax.scatter(x[-1], y[-1], z[-1], color="red")
-# Функция рисования зависимости координат от времени
+# Функция отрисовки зависимости координат от времени. На вход принимает массив итераций, соответствующие массивы координат и сведения о том, нужно ли обновлять рисунок
 def animation_time(time, x, y, z, clear):
 
     plt.subplot(3, 1, 1)
@@ -125,7 +125,7 @@ def STOP():
 keyboard.add_hotkey("esc", STOP)
 keyboard.add_hotkey("ctrl", ANIMATION)
 
-# Рассчет ускорения диона
+# Рассчет ускорения диона по 2 закону Ньютона. Ускорения расчитываются как отношение действующих сил (со стороны магнитного и электростатического полей) к массе частицы
 def calculation_acceleration(velocity, mass, E_charge, B_charge):
     acceleration_x = (E_charge *E_x) / mass + (E_charge * velocity[1] * B_z) / mass
     acceleration_y = -(E_charge * velocity[0] * B_z) / mass - (B_charge * velocity[2] * E_x) / mass
@@ -135,6 +135,7 @@ def calculation_acceleration(velocity, mass, E_charge, B_charge):
 # Функция расчета обновления состояния диона
 def update_DION(DION, dt):
     positions = []
+    # вызов функции, расчета нового положения диона методом Рунге-Кутта
     DION.runge_kutta(dt)
     positions.append(DION.position.copy())
     return np.array(positions)
@@ -162,13 +163,13 @@ class Dion:
         k4_x = self.velocity + dt * k3_x
 
         self.position += (dt / 6) * (k1_x + 2 * k2_x + 2 * k3_x + k4_x)
-        # self.position += self.velocity
+
         self.velocity += (dt / 6) * (k1_v + 2 * k2_v + 2 * k3_v + k4_v)
 
 # Присваиваем диону заданные параметры
 DION = Dion(mass=Mass, E_charge=Electric_charge, B_charge=Magnetic_charge, velocity_x=Velocity_X, velocity_y=Velocity_Y, velocity_z=Velocity_Z)
 
-# Задание вспомогательных массивов и переменных
+# Задание вспомогательных массивов и переменных (для координат и времени)
 X=[]
 Y=[]
 Z=[]
@@ -187,6 +188,7 @@ while running and iteration<iteration_limit:
     
     if animation and sim_pause_ter<now_sim_iter: # Если нужно, отображаем анимацию
         if animation_type=="3D": 
+            # вызов функции отображения 3Д симуляции
             animation_3D(X, Y, Z) 
         else: animation_time(Time, X, Y, Z, clear=True)
         now_sim_iter=0
@@ -202,6 +204,7 @@ if animation_type=="3D": animation_3D(X, Y, Z)
 else: animation_time(Time, X, Y, Z, clear=False)
 plt.show()
 plt.draw()
+
 
 
 
